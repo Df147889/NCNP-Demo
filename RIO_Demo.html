@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RIO — مرصد الذكاء الريفي | نموذج تفاعلي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#1f7a5c; --green-d:#155843; --green-l:#e8f4ef;
+  --gold:#c79a3a; --gold-l:#f8f1e0;
+  --ink:#132a24; --muted:#5f7169; --line:#e2e9e6; --bg:#f4f7f6;
+  --blue:#2b6cb0; --blue-l:#e8f0f9;
+  --red:#c0392b; --red-l:#fbeae8;
+  --amber:#b8791a; --amber-l:#fbf1df;
+  --purple:#6b46a3; --purple-l:#f0e9f8;
+  --radius:14px; --shadow:0 2px 10px rgba(19,42,36,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;font-size:15px}
+button{font-family:inherit;cursor:pointer}
+.app{display:flex;min-height:100vh}
+.sidebar{width:270px;background:#fff;border-left:1px solid var(--line);position:fixed;top:0;bottom:0;right:0;overflow-y:auto;z-index:20}
+.brand{padding:20px 20px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.brand .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--green),var(--green-d));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:19px;flex-shrink:0}
+.brand h1{font-size:17px;font-weight:800;letter-spacing:-.3px}
+.brand span{font-size:11.5px;color:var(--muted);font-weight:500}
+.nav-group{padding:14px 12px 4px}
+.nav-group h4{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:0 10px 8px;font-weight:700}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:var(--ink);font-size:14px;font-weight:500;border:none;background:none;width:100%;text-align:right;transition:.15s;margin-bottom:1px}
+.nav-item:hover{background:var(--green-l)}
+.nav-item.active{background:var(--green);color:#fff;font-weight:700}
+.nav-item .ic{width:20px;text-align:center;font-size:15px}
+.nav-item .v2{margin-right:auto;font-size:9.5px;background:var(--gold-l);color:var(--gold);padding:2px 6px;border-radius:6px;font-weight:700}
+.nav-item.active .v2{background:rgba(255,255,255,.25);color:#fff}
+.main{margin-right:270px;flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{background:#fff;border-bottom:1px solid var(--line);padding:12px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:15}
+.crumb{font-size:13px;color:var(--muted);font-weight:500}
+.crumb b{color:var(--ink)}
+.topbar .spacer{flex:1}
+.role-select{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 12px}
+.role-select label{font-size:12px;color:var(--muted);font-weight:600}
+.role-select select{border:none;background:none;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--green);cursor:pointer;outline:none}
+.lang-toggle{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.lang-toggle button{padding:6px 12px;border:none;background:none;font-weight:700;font-size:12.5px;color:var(--muted)}
+.lang-toggle button.on{background:var(--green);color:#fff}
+.content{padding:28px;max-width:1200px;width:100%;margin:0 auto}
+.page-head{margin-bottom:22px}
+.page-head h2{font-size:24px;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:10px}
+.page-head p{color:var(--muted);font-size:14.5px;margin-top:3px;max-width:760px}
+.pill{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:700;display:inline-block}
+.pill.v1{background:var(--green-l);color:var(--green-d)}
+.pill.v2{background:var(--gold-l);color:var(--gold)}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card.pad{padding:22px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.stat{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.stat .lbl{font-size:13px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:7px}
+.stat .num{font-size:30px;font-weight:800;letter-spacing:-1px;margin-top:6px}
+.stat .sub{font-size:12px;color:var(--muted);margin-top:2px}
+.stat .num.g{color:var(--green)} .stat .num.b{color:var(--blue)} .stat .num.a{color:var(--amber)} .stat .num.p{color:var(--purple)}
+h3.sec{font-size:16px;font-weight:800;margin:26px 0 12px;display:flex;align-items:center;gap:8px}
+h3.sec:first-child{margin-top:0}
+.btn{background:var(--green);color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:700;font-size:14px;transition:.15s;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{background:var(--green-d)}
+.btn.ghost{background:#fff;color:var(--green);border:1.5px solid var(--green)}
+.btn.gold{background:var(--gold)}.btn.gold:hover{background:#a67f27}
+.btn.sm{padding:7px 14px;font-size:13px}
+.btn.gray{background:#eef2f0;color:var(--ink)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:right;padding:11px 14px;background:var(--bg);color:var(--muted);font-weight:700;font-size:12.5px;border-bottom:1px solid var(--line)}
+td{padding:12px 14px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafcfb}
+.badge{font-size:11.5px;padding:3px 10px;border-radius:20px;font-weight:700;display:inline-flex;align-items:center;gap:5px}
+.b-green{background:var(--green-l);color:var(--green-d)}
+.b-blue{background:var(--blue-l);color:var(--blue)}
+.b-amber{background:var(--amber-l);color:var(--amber)}
+.b-red{background:var(--red-l);color:var(--red)}
+.b-purple{background:var(--purple-l);color:var(--purple)}
+.b-gray{background:#eef2f0;color:var(--muted)}
+.stepper{display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:22px;box-shadow:var(--shadow);overflow-x:auto}
+.step{display:flex;align-items:center;gap:9px;padding:6px 4px;flex-shrink:0}
+.step .cir{width:26px;height:26px;border-radius:50%;background:#eef2f0;color:var(--muted);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12.5px;flex-shrink:0}
+.step.done .cir{background:var(--green);color:#fff}
+.step.cur .cir{background:var(--gold);color:#fff;box-shadow:0 0 0 4px var(--gold-l)}
+.step .t{font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.step.done .t,.step.cur .t{color:var(--ink)}
+.step .arrow{color:var(--line);font-size:14px}
+.ai-box{background:linear-gradient(135deg,#f3f0fa,#eef4fb);border:1px solid #ddd6f0;border-radius:var(--radius);padding:18px}
+.ai-head{display:flex;align-items:center;gap:9px;font-weight:800;color:var(--purple);font-size:14px;margin-bottom:12px}
+.ai-head .spark{width:26px;height:26px;background:var(--purple);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff}
+.confidence{height:7px;background:#e5e0f0;border-radius:20px;overflow:hidden;margin-top:5px}
+.confidence>i{display:block;height:100%;background:linear-gradient(90deg,var(--purple),#8a63c7);border-radius:20px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+.field input,.field textarea,.field select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 13px;font-family:inherit;font-size:14px;background:#fff}
+.field textarea{resize:vertical;min-height:80px}
+.note{background:var(--green-l);border-right:3px solid var(--green);padding:11px 15px;border-radius:8px;font-size:13px;color:var(--green-d)}
+.note.gold{background:var(--gold-l);border-color:var(--gold);color:var(--amber)}
+.note.blue{background:var(--blue-l);border-color:var(--blue);color:var(--blue)}
+.q-item{display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border:1px solid var(--line);border-radius:11px;margin-bottom:9px;background:#fff}
+.q-item .chk{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px}
+.q-item .chk.off{background:#fff;border:1.5px solid var(--line)}
+.q-item .qtext{font-weight:600;font-size:14px}
+.q-item .qmeta{font-size:12px;color:var(--muted);margin-top:3px}
+.bar-row{display:flex;align-items:center;gap:12px;margin-bottom:11px}
+.bar-row .bl{width:190px;font-size:13.5px;font-weight:600;flex-shrink:0}
+.bar-track{flex:1;height:26px;background:#eef2f0;border-radius:8px;overflow:hidden;position:relative}
+.bar-fill{height:100%;border-radius:8px;display:flex;align-items:center;padding:0 10px;color:#fff;font-weight:700;font-size:12.5px}
+.bar-row .bv{width:52px;text-align:left;font-weight:800;flex-shrink:0}
+.timeline{position:relative;padding-right:22px}
+.timeline::before{content:'';position:absolute;right:7px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl-item{position:relative;padding-bottom:18px}
+.tl-item::before{content:'';position:absolute;right:-19px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--green);border:2.5px solid #fff;box-shadow:0 0 0 1.5px var(--green)}
+.tl-item .tt{font-weight:700;font-size:13.5px}
+.tl-item .td{font-size:12.5px;color:var(--muted)}
+.map-wrap{display:grid;grid-template-columns:1fr 280px;gap:16px}
+@media(max-width:900px){.map-wrap{grid-template-columns:1fr}}
+.legend-row{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:13px}
+.legend-row .sw{width:16px;height:16px;border-radius:5px}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:13px 22px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 8px 30px rgba(0,0,0,.25);opacity:0;transition:.3s;z-index:100}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.role-card{border:1px solid var(--line);border-radius:12px;padding:15px;background:#fff}
+.role-card .rh{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.role-card .rn{font-weight:800;font-size:14.5px}
+.role-card .rd{font-size:12.5px;color:var(--muted)}
+.avatar{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;flex-shrink:0}
+.gov-banner{background:linear-gradient(120deg,var(--green-d),var(--green));color:#fff;border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.gov-banner .gi{width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.gov-banner b{font-weight:800}
+.gov-banner p{font-size:13px;opacity:.92}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">RIO</div>
+      <div><h1>مرصد الذكاء الريفي</h1><span>Rural Intelligence Observatory</span></div>
+    </div>
+    <nav id="nav"></nav>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb" id="crumb"></div>
+      <div class="spacer"></div>
+      <div class="lang-toggle">
+        <button class="on">عربي</button>
+        <button onclick="toast('العرض بالإنجليزية متاح في النسخة الأولى — واجهة تجريبية')">EN</button>
+      </div>
+      <div class="role-select">
+        <label>الدور:</label>
+        <select id="role" onchange="changeRole()">
+          <option>مسؤول بحوث الجمعية</option>
+          <option>المُراجِع / المُعتمِد</option>
+          <option>مشرف المركز</option>
+          <option>مدير الجمعية</option>
+          <option>محلل البيانات</option>
+        </select>
+      </div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const NAV = [
+  {group:'عام', items:[{id:'dashboard', ic:'▣', t:'لوحة البيانات'}]},
+  {group:'رحلة التقييم — النسخة الأولى', items:[
+    {id:'register', ic:'①', t:'التسجيل والموافقة'},
+    {id:'need', ic:'②', t:'تعريف الحاجة'},
+    {id:'survey', ic:'③', t:'بناء الاستبيان'},
+    {id:'collect', ic:'④', t:'جمع الردود'},
+    {id:'score', ic:'⑤', t:'التقييم Top-5'},
+    {id:'review', ic:'⑥', t:'المراجعة والاعتماد'},
+    {id:'report', ic:'⑦', t:'التقارير والتصدير'},
+    {id:'share', ic:'⑧', t:'المشاركة بين الجهات'},
+  ]},
+  {group:'الحوكمة والإشراف', items:[
+    {id:'oversight', ic:'◎', t:'إشراف المركز'},
+    {id:'audit', ic:'❐', t:'سجل التدقيق'},
+    {id:'library', ic:'▤', t:'المكتبة المرجعية'},
+  ]},
+  {group:'النسخة الثانية — النطاق الكامل', items:[
+    {id:'map', ic:'⬡', t:'الخريطة الجغرافية', v2:true},
+    {id:'needsmgmt', ic:'⧉', t:'إدارة الاحتياجات', v2:true},
+    {id:'import', ic:'⇪', t:'استيراد البيانات', v2:true},
+    {id:'dedupe', ic:'⧎', t:'كشف التكرار الدلالي', v2:true},
+    {id:'citizen', ic:'☺', t:'قناة المواطن', v2:true},
+    {id:'methodology', ic:'⚙', t:'إدارة المنهجية والأوزان', v2:true},
+    {id:'trends', ic:'⟁', t:'دورات القياس والاتجاهات', v2:true},
+    {id:'roles', ic:'⚑', t:'نموذج الأدوار التسعة', v2:true},
+  ]},
+];
+const TITLES = {
+  dashboard:'لوحة البيانات', register:'التسجيل والموافقة', need:'تعريف الحاجة', survey:'بناء الاستبيان',
+  collect:'جمع الردود الميدانية', score:'التقييم وأولويات Top-5', review:'طابور المراجعة والاعتماد',
+  report:'التقارير والتصدير', share:'المشاركة بين الجهات', oversight:'إشراف المركز', audit:'سجل التدقيق',
+  library:'المكتبة المرجعية', map:'الخريطة الجغرافية التفاعلية', needsmgmt:'إدارة الاحتياجات المهيكلة',
+  import:'استيراد البيانات', dedupe:'كشف التكرار الدلالي', citizen:'قناة المواطن / المستفيد',
+  methodology:'إدارة المنهجية والأوزان', trends:'دورات القياس والاتجاهات', roles:'نموذج الأدوار التسعة'
+};
+function buildNav(){
+  let h='';
+  NAV.forEach(g=>{
+    h+='<div class="nav-group"><h4>'+g.group+'</h4>';
+    g.items.forEach(it=>{
+      h+='<button class="nav-item" data-id="'+it.id+'" onclick="go(\''+it.id+'\')"><span class="ic">'+it.ic+'</span><span>'+it.t+'</span>'+(it.v2?'<span class="v2">V2</span>':'')+'</button>';
+    });
+    h+='</div>';
+  });
+  document.getElementById('nav').innerHTML=h;
+}
+let current='dashboard';
+function go(id){
+  current=id;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.id===id));
+  const isV2 = NAV.some(g=>g.items.some(i=>i.id===id&&i.v2));
+  document.getElementById('crumb').innerHTML = 'RIO / <b>'+TITLES[id]+'</b> '+(isV2?'<span class="pill v2">النسخة الثانية</span>':'<span class="pill v1">النسخة الأولى</span>');
+  document.getElementById('content').innerHTML = SCREENS[id]();
+  window.scrollTo(0,0);
+}
+function changeRole(){ toast('تم التبديل إلى دور: '+document.getElementById('role').value); }
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.innerHTML='✓ '+msg; t.classList.add('show');
+  clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'),2600);
+}
+function stepper(cur){
+  const steps=['التسجيل','الحاجة','الاستبيان','الردود','التقييم','المراجعة','التقرير','المشاركة'];
+  let h='<div class="stepper">';
+  steps.forEach((s,i)=>{
+    const n=i+1; const cls=n<cur?'done':(n===cur?'cur':'');
+    h+='<div class="step '+cls+'"><div class="cir">'+(n<cur?'✓':n)+'</div><div class="t">'+s+'</div></div>';
+    if(i<steps.length-1)h+='<div class="step"><span class="arrow">‹</span></div>';
+  });
+  return h+'</div>';
+}
+const SCREENS = {};
+
+SCREENS.dashboard = ()=>`
+  <div class="gov-banner">
+    <div class="gi">🛡️</div>
+    <div><b>مبدأ الحوكمة الحاكم للمنصة</b>
+      <p>الذكاء الاصطناعي يقترح فقط — والإنسان يراجع ويعتمد قبل نشر أي شيء. لا تصنيف أو أولوية أو تقرير يُنشر تلقائياً، ولا تقرير جهة يُتاح لجهة أخرى إلا بموافقتها.</p></div>
+  </div>
+  <div class="page-head"><h2>لوحة البيانات <span class="pill v1">جمعية تنمية القرى — الرياض</span></h2>
+  <p>نظرة عامة على نشاط الجهة داخل مساحة عملها الخاصة والمعزولة.</p></div>
+  <div class="grid g4">
+    <div class="stat"><div class="lbl">📋 الدراسات النشطة</div><div class="num g">6</div><div class="sub">٢ قيد جمع الردود</div></div>
+    <div class="stat"><div class="lbl">📥 الردود المجمّعة</div><div class="num b">1,284</div><div class="sub">هذا الشهر +٣٤٢</div></div>
+    <div class="stat"><div class="lbl">⏳ بانتظار المراجعة</div><div class="num a">4</div><div class="sub">١ تجاوز مهلة SLA</div></div>
+    <div class="stat"><div class="lbl">📤 طلبات مشاركة</div><div class="num p">3</div><div class="sub">١ بانتظار قرارك</div></div>
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card pad">
+      <h3 class="sec">📈 أحدث الدراسات</h3>
+      <table>
+        <tr><th>الدراسة</th><th>المرحلة</th><th>الحالة</th></tr>
+        <tr><td>احتياجات المياه — المنطقة الجنوبية</td><td>التقييم</td><td><span class="badge b-amber">⏳ مراجعة</span></td></tr>
+        <tr><td>خدمات التعليم الريفي</td><td>جمع الردود</td><td><span class="badge b-blue">● نشطة</span></td></tr>
+        <tr><td>الرعاية الصحية الأولية بالقرى</td><td>منشورة</td><td><span class="badge b-green">✓ منشورة</span></td></tr>
+        <tr><td>الطرق والبنية التحتية</td><td>التقرير</td><td><span class="badge b-blue">● نشطة</span></td></tr>
+      </table>
+    </div>
+    <div class="card pad">
+      <h3 class="sec">🔔 يحتاج انتباهك</h3>
+      <div class="timeline">
+        <div class="tl-item"><div class="tt">اقتراح تصنيف من الذكاء الاصطناعي بانتظار الاعتماد</div><div class="td">دراسة المياه — ثقة ٩٢٪ · قبل ١٠ دقائق</div></div>
+        <div class="tl-item"><div class="tt">طلب مشاركة تقرير من «جمعية القرى — عسير»</div><div class="td">بانتظار موافقة المالك · قبل ساعة</div></div>
+        <div class="tl-item"><div class="tt">⚠️ عنصر مراجعة اقترب من تجاوز مهلة SLA</div><div class="td">اعتماد استبيان · متبقٍ ٤٥ دقيقة</div></div>
+        <div class="tl-item"><div class="tt">اكتمل النسخ الاحتياطي المُتحقق منه</div><div class="td">استعادة مُختبرة بنجاح · ٠٣:٠٠ ص</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="note blue" style="margin-top:16px">💡 هذه واجهة تجريبية (Prototype) ببيانات توضيحية. استخدم القائمة الجانبية للتنقل عبر رحلة التقييم الكاملة وميزات النسختين الأولى والثانية.</div>
+`;
+
+SCREENS.register = ()=>stepper(1)+`
+  <div class="page-head"><h2>① التسجيل والموافقة</h2>
+  <p>كل جهة غير ربحية تعمل في مساحة عمل خاصة ومعزولة، وتقبل إقرار استخدام ومشاركة البيانات وتضبط نطاقها الجغرافي. (BR-01، BR-02، BR-03)</p></div>
+  <div class="grid g2">
+    <div class="card pad">
+      <h3 class="sec">مسار التسجيل</h3>
+      <div class="field"><label>طريقة التسجيل</label>
+        <select><option>دعوة من المركز — إنشاء الحساب ودعوة مدير الجهة</option><option>تسجيل ذاتي مع إرفاق بيانات الترخيص (يُحقق قبل التفعيل)</option></select></div>
+      <div class="field"><label>اسم الجهة غير الربحية</label><input value="جمعية تنمية القرى — الرياض"></div>
+      <div class="field"><label>رقم الترخيص</label><input value="NGO-RUH-4482"></div>
+      <div class="field"><label>النطاق الجغرافي للعمل</label>
+        <select><option>منطقة الرياض — كل المحافظات</option><option>منطقة عسير</option><option>المنطقة الشرقية</option></select></div>
+      <div class="note gold">🔎 التحقق الآلي من الترخيص عبر الأنظمة الخارجية (مثل ناجز) مؤجّل لما بعد الـ MVP.</div>
+    </div>
+    <div class="card pad">
+      <h3 class="sec">إقرار استخدام ومشاركة البيانات</h3>
+      <div style="border:1px solid var(--line);border-radius:11px;padding:15px;font-size:13px;color:var(--muted);height:180px;overflow-y:auto;background:var(--bg)">
+        <b style="color:var(--ink)">نموذج الموافقة — الإصدار ٢٫٠</b><br><br>
+        تقر الجهة بأن بياناتها تبقى خاصة ومعزولة، ولا تُتاح لأي جهة أخرى إلا عبر طلب مشاركة معتمد. يُسجَّل إصدار الموافقة وتاريخها. تُصغّر البيانات الشخصية قبل أي معالجة بالذكاء الاصطناعي، وتُعامل بيانات المستفيدين بسرية...
+      </div>
+      <label style="display:flex;gap:10px;align-items:center;margin-top:14px;font-weight:600;font-size:14px;cursor:pointer">
+        <span class="q-item" style="margin:0;padding:0;border:none"><span class="chk">✓</span></span>
+        أوافق على إقرار استخدام ومشاركة البيانات (يُسجَّل الإصدار والتاريخ)</label>
+      <button class="btn" style="margin-top:16px;width:100%" onclick="toast('تم تفعيل الجهة وتسجيل الموافقة — الإصدار ٢٫٠ بتاريخ اليوم'); go('need')">تفعيل الجهة ومتابعة ‹</button>
+    </div>
+  </div>
+`;
+
+SCREENS.need = ()=>stepper(2)+`
+  <div class="page-head"><h2>② تعريف الحاجة</h2>
+  <p>يكتب المسؤول الحاجة المجتمعية بنص حر، فيقترح الذكاء الاصطناعي المجال والمجال الفرعي مع مؤشر ثقة — والمسؤول يؤكد أو يعدّل. (BR-04)</p></div>
+  <div class="grid g2">
+    <div class="card pad">
+      <div class="field"><label>وصف الحاجة المجتمعية (نص حر)</label>
+        <textarea style="min-height:120px">تعاني قرى المنطقة الجنوبية من نقص حاد في مصادر مياه الشرب النظيفة، حيث تعتمد الأسر على آبار غير مُعالَجة وتقطع مسافات طويلة لجلب المياه، مع تكرار حالات التلوث خلال موسم الأمطار.</textarea></div>
+      <button class="btn gold" onclick="document.getElementById('aiNeed').classList.remove('hidden');toast('حلّل الذكاء الاصطناعي الحاجة واقترح تصنيفاً')">✦ اطلب اقتراح الذكاء الاصطناعي</button>
+    </div>
+    <div class="card pad hidden" id="aiNeed">
+      <div class="ai-box">
+        <div class="ai-head"><span class="spark">✦</span> اقتراح الذكاء الاصطناعي</div>
+        <div class="field"><label>المجال المقترح</label>
+          <div style="display:flex;gap:8px;align-items:center"><span class="badge b-purple" style="font-size:14px;padding:7px 14px">البنية التحتية والخدمات الأساسية</span></div>
+          <div class="confidence"><i style="width:92%"></i></div><div style="font-size:12px;color:var(--purple);font-weight:700;margin-top:4px">مؤشر الثقة ٩٢٪</div></div>
+        <div class="field"><label>المجال الفرعي المقترح</label>
+          <span class="badge b-purple" style="font-size:13.5px;padding:6px 13px">المياه والصرف الصحي</span>
+          <div class="confidence"><i style="width:88%"></i></div><div style="font-size:12px;color:var(--purple);font-weight:700;margin-top:4px">مؤشر الثقة ٨٨٪</div></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn" onclick="toast('تم اعتماد التصنيف — سُجِّل القرار في سجل التدقيق');go('survey')">✓ تأكيد التصنيف ‹</button>
+        <button class="btn ghost" onclick="toast('يمكنك تعديل المجال يدوياً — القرار النهائي بيدك')">✎ تعديل يدوي</button>
+      </div>
+      <div class="note" style="margin-top:14px">👤 الذكاء الاصطناعي يقترح فقط. لا يُعتمد أي تصنيف دون قرار بشري مُسجَّل.</div>
+    </div>
+  </div>
+`;
+
+SCREENS.survey = ()=>stepper(3)+`
+  <div class="page-head"><h2>③ بناء الاستبيان</h2>
+  <p>تُجمَّع الاستبيانات حصراً من بنك الأسئلة المعتمد؛ الذكاء الاصطناعي يوصي بالمؤشرات والأسئلة من البنك فقط ولا ينشئ نص سؤال أبداً. يعتمد المُراجِع الاستبيان قبل النشر. (BR-05، BR-06)</p></div>
+  <div class="ai-box" style="margin-bottom:18px">
+    <div class="ai-head"><span class="spark">✦</span> أسئلة موصى بها من بنك الأسئلة المعتمد — «المياه والصرف الصحي»</div>
+    <div style="font-size:12.5px;color:var(--purple)">اختار الذكاء الاصطناعي ٦ أسئلة من ٤٢ في البنك. كل الأسئلة معتمدة مسبقاً — لا يمكن تحرير نصها.</div>
+  </div>
+  <div class="card pad">
+    <div class="q-item"><span class="chk">✓</span><div><div class="qtext">ما المصدر الرئيسي لمياه الشرب لدى الأسرة؟</div><div class="qmeta">مؤشر: توفر المصدر · نوع: اختيار من متعدد · مرجع البنك Q-W-011</div></div></div>
+    <div class="q-item"><span class="chk">✓</span><div><div class="qtext">كم تبعد أقرب نقطة مياه صالحة للشرب عن المنزل؟</div><div class="qmeta">مؤشر: سهولة الوصول · نوع: نطاق مسافة · مرجع البنك Q-W-014</div></div></div>
+    <div class="q-item"><span class="chk">✓</span><div><div class="qtext">هل تعرّض أفراد الأسرة لأمراض مرتبطة بالمياه خلال ٦ أشهر؟</div><div class="qmeta">مؤشر: الأثر الصحي · نوع: نعم/لا · مرجع البنك Q-W-023</div></div></div>
+    <div class="q-item"><span class="chk">✓</span><div><div class="qtext">هل تُعالَج المياه قبل الاستخدام؟ وكيف؟</div><div class="qmeta">مؤشر: جودة المياه · نوع: اختيار · مرجع البنك Q-W-027</div></div></div>
+    <div class="q-item"><span class="chk off"></span><div><div class="qtext">ما تكلفة تأمين المياه شهرياً على الأسرة؟</div><div class="qmeta">مؤشر: العبء الاقتصادي · نوع: نطاق مبلغ · مرجع البنك Q-W-031</div></div></div>
+    <div class="q-item"><span class="chk off"></span><div><div class="qtext">هل تتوفر شبكة صرف صحي في القرية؟</div><div class="qmeta">مؤشر: الصرف الصحي · نوع: نعم/لا · مرجع البنك Q-W-038</div></div></div>
+  </div>
+  <div class="grid g2" style="margin-top:18px">
+    <div class="card pad">
+      <h3 class="sec">خطة توزيع العينة <span class="pill v1">إلزامية</span></h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px">مصدر ونطاق العينة داخل المحافظات المستهدفة (BR-06).</p>
+      <table>
+        <tr><th>المحافظة</th><th>عدد القرى</th><th>حجم العينة</th></tr>
+        <tr><td>محافظة الأفلاج</td><td>١٢</td><td>١٨٠</td></tr>
+        <tr><td>محافظة وادي الدواسر</td><td>٨</td><td>١٤٠</td></tr>
+        <tr><td>محافظة السليل</td><td>٥</td><td>٩٠</td></tr>
+      </table>
+    </div>
+    <div class="card pad" style="display:flex;flex-direction:column;justify-content:center;align-items:flex-start">
+      <div class="note gold" style="margin-bottom:16px">⏳ يتطلب النشر اعتماد مُراجِع بشري أولاً.</div>
+      <button class="btn" onclick="toast('أُرسل الاستبيان إلى طابور المراجعة للاعتماد');go('review')">إرسال للمراجعة والاعتماد ‹</button>
+    </div>
+  </div>
+`;
+
+SCREENS.collect = ()=>stepper(4)+`
+  <div class="page-head"><h2>④ جمع الردود الميدانية</h2>
+  <p>تجمع الفرق الميدانية الردود عبر رابط استبيان عام متوافق مع الجوال مع التحقق؛ تُخزَّن كل ردة بشكل خاص داخل مساحة عمل الجهة المالكة. (BR-07، BR-08)</p></div>
+  <div class="grid g3">
+    <div class="stat"><div class="lbl">📥 إجمالي الردود</div><div class="num g">410</div><div class="sub">من أصل ٤١٠ مستهدفة (١٠٠٪)</div></div>
+    <div class="stat"><div class="lbl">✓ ردود صالحة</div><div class="num b">388</div><div class="sub">اجتازت قواعد التحقق</div></div>
+    <div class="stat"><div class="lbl">⚠ تحتاج مراجعة</div><div class="num a">22</div><div class="sub">ناقصة أو غير متسقة</div></div>
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card pad">
+      <h3 class="sec">🔗 رابط الجمع الميداني</h3>
+      <div style="background:var(--bg);border:1px dashed var(--line);border-radius:11px;padding:14px;display:flex;align-items:center;gap:14px">
+        <div style="width:78px;height:78px;background:#fff;border:1px solid var(--line);border-radius:10px;display:grid;place-items:center;font-size:11px;color:var(--muted);text-align:center;line-height:1.3">رمز<br>QR</div>
+        <div><div style="font-weight:700;font-size:13.5px">survey.rio.sa/w/8f2a-water</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px">رابط عام · متوافق مع الجوال · مع تحقق من الإدخال</div>
+        <button class="btn sm gray" style="margin-top:8px" onclick="toast('نُسخ الرابط')">نسخ الرابط</button></div>
+      </div>
+      <h3 class="sec">📎 مصادر بيانات إضافية</h3>
+      <p style="font-size:12.5px;color:var(--muted);margin-bottom:10px">يمكن إرفاق دراسات سابقة ومستندات داعمة (Excel، Word، PDF) يقرأها الذكاء الاصطناعي مع الردود عند إبراز الأولويات.</p>
+      <div class="q-item" style="margin-bottom:6px"><span style="font-size:16px">📄</span><div><div class="qtext" style="font-size:13px">دراسة المياه السابقة ٢٠٢٤.pdf</div></div></div>
+      <div class="q-item"><span style="font-size:16px">📊</span><div><div class="qtext" style="font-size:13px">إحصاءات القرى — الأفلاج.xlsx</div></div></div>
+    </div>
+    <div class="card pad">
+      <h3 class="sec">📊 تدفق الردود اليومي</h3>
+      <div class="bar-row"><div class="bl">الأحد</div><div class="bar-track"><div class="bar-fill" style="width:45%;background:var(--green)">62</div></div></div>
+      <div class="bar-row"><div class="bl">الإثنين</div><div class="bar-track"><div class="bar-fill" style="width:70%;background:var(--green)">98</div></div></div>
+      <div class="bar-row"><div class="bl">الثلاثاء</div><div class="bar-track"><div class="bar-fill" style="width:58%;background:var(--green)">81</div></div></div>
+      <div class="bar-row"><div class="bl">الأربعاء</div><div class="bar-track"><div class="bar-fill" style="width:85%;background:var(--green)">119</div></div></div>
+      <div class="bar-row"><div class="bl">الخميس</div><div class="bar-track"><div class="bar-fill" style="width:36%;background:var(--gold)">50</div></div></div>
+      <div class="note" style="margin-top:14px">🔒 كل ردة تُخزَّن داخل مساحة عمل الجهة الخاصة — لا وصول لأي جهة أخرى.</div>
+      <button class="btn" style="margin-top:16px" onclick="toast('اكتمل الجمع — الانتقال إلى التقييم');go('score')">إغلاق الجمع والانتقال للتقييم ‹</button>
+    </div>
+  </div>
+`;
+
+SCREENS.score = ()=>stepper(5)+`
+  <div class="page-head"><h2>⑤ التقييم وأولويات Top-5</h2>
+  <p>تُقيَّم كل ردة على مقياس شدة حاجة ٠–١٠٠ وفق المنهجية المعتمدة، وتُجمَّع عبر خمسة مستويات إلى قائمة أولويات Top-5. (BR-09، BR-10، BR-11)</p></div>
+  <div class="ai-box" style="margin-bottom:18px">
+    <div class="ai-head"><span class="spark">✦</span> نظرة الذكاء الاصطناعي على جودة الردود</div>
+    <div style="font-size:13px;color:var(--purple)">٣٨٨ ردة صالحة · ٢٢ مُعلَّمة (ناقصة/غير متسقة) · التغطية الجغرافية متوازنة عبر المحافظات الثلاث · لا توجد أنماط ردود مشبوهة.</div>
+  </div>
+  <div class="card pad">
+    <h3 class="sec">🏆 قائمة الأولويات Top-5 — درجة شدة الحاجة (٠–١٠٠)</h3>
+    <div class="bar-row"><div class="bl">١. مياه شرب نظيفة</div><div class="bar-track"><div class="bar-fill" style="width:91%;background:var(--red)">٩١</div></div><div class="bv">حرجة</div></div>
+    <div class="bar-row"><div class="bl">٢. معالجة وتنقية المياه</div><div class="bar-track"><div class="bar-fill" style="width:84%;background:var(--red)">٨٤</div></div><div class="bv">حرجة</div></div>
+    <div class="bar-row"><div class="bl">٣. قرب نقاط المياه</div><div class="bar-track"><div class="bar-fill" style="width:76%;background:var(--amber)">٧٦</div></div><div class="bv">عالية</div></div>
+    <div class="bar-row"><div class="bl">٤. شبكة الصرف الصحي</div><div class="bar-track"><div class="bar-fill" style="width:68%;background:var(--amber)">٦٨</div></div><div class="bv">عالية</div></div>
+    <div class="bar-row"><div class="bl">٥. العبء الاقتصادي للمياه</div><div class="bar-track"><div class="bar-fill" style="width:57%;background:var(--gold)">٥٧</div></div><div class="bv">متوسطة</div></div>
+  </div>
+  <div class="note gold" style="margin-top:16px">⏳ نتائج التقييم لا تُنشر تلقائياً — تنتقل إلى المُراجِع للاعتماد. النتائج تُعاد إنتاجها بثبات من ردودها المصدرية.</div>
+  <button class="btn" style="margin-top:16px" onclick="toast('أُرسلت نتائج التقييم للمراجعة');go('review')">إرسال النتائج للاعتماد ‹</button>
+`;
+
+SCREENS.review = ()=>stepper(6)+`
+  <div class="page-head"><h2>⑥ طابور المراجعة والاعتماد <span class="pill v1">بوابة القرار البشري</span></h2>
+  <p>تُدار المراجعات المعلّقة عبر طابور مهام مع عتبات SLA؛ تنبيهات داخل التطبيق وبالبريد قبل التجاوز وعنده، حتى لا تتأخر الاعتمادات. (BR-16، BR-17)</p></div>
+  <div class="card">
+    <table>
+      <tr><th>العنصر</th><th>النوع</th><th>ثقة الـ AI</th><th>مهلة SLA</th><th>الإجراء</th></tr>
+      <tr><td>تصنيف حاجة المياه</td><td><span class="badge b-purple">تصنيف AI</span></td><td>٩٢٪</td><td><span class="badge b-green">متبقٍ ٣ ساعات</span></td><td><button class="btn sm" onclick="toast('تم الاعتماد وتسجيل القرار')">اعتماد</button></td></tr>
+      <tr><td>استبيان المياه والصرف</td><td><span class="badge b-blue">نشر استبيان</span></td><td>—</td><td><span class="badge b-amber">⚠ متبقٍ ٤٥ د</span></td><td><button class="btn sm" onclick="toast('اعتُمد الاستبيان — جاهز للنشر')">اعتماد</button></td></tr>
+      <tr><td>تقرير Top-5 للمياه</td><td><span class="badge b-green">تقرير</span></td><td>—</td><td><span class="badge b-red">✕ تجاوز المهلة</span></td><td><button class="btn sm gold" onclick="toast('صُعِّد التنبيه للمُراجِع المسؤول')">مراجعة</button></td></tr>
+      <tr><td>ملخص جودة الردود</td><td><span class="badge b-purple">ملخص AI</span></td><td>٨٦٪</td><td><span class="badge b-green">متبقٍ ٥ ساعات</span></td><td><button class="btn sm ghost" onclick="toast('عُرض المقترح — يمكنك التعديل قبل الاعتماد')">فتح</button></td></tr>
+    </table>
+  </div>
+  <div class="grid g2" style="margin-top:18px">
+    <div class="card pad">
+      <h3 class="sec">تفاصيل المراجعة — تصنيف حاجة المياه</h3>
+      <div class="ai-box">
+        <div class="ai-head"><span class="spark">✦</span> اقتراح الذكاء الاصطناعي</div>
+        <div style="font-size:13.5px">المجال: <b>البنية التحتية</b> · الفرعي: <b>المياه والصرف الصحي</b> · الثقة ٩٢٪</div>
+      </div>
+      <div class="field" style="margin-top:14px"><label>سبب القرار (يُسجَّل)</label><textarea style="min-height:60px">التصنيف مطابق لوصف الحاجة والمنهجية المعتمدة.</textarea></div>
+      <div style="display:flex;gap:10px"><button class="btn" onclick="toast('اعتُمد وسُجِّل القرار والمنشأ في سجل التدقيق');go('report')">✓ اعتماد وإصدار ‹</button><button class="btn ghost" onclick="toast('أُعيد العنصر للمسؤول مع ملاحظة')">↺ إعادة للتعديل</button></div>
+    </div>
+    <div class="card pad">
+      <h3 class="sec">🔔 آلية التنبيه والتصعيد</h3>
+      <div class="timeline">
+        <div class="tl-item"><div class="tt">تنبيه مبكر — اقتراب مهلة الاستبيان</div><div class="td">داخل التطبيق + بريد · قبل التجاوز بساعة</div></div>
+        <div class="tl-item"><div class="tt">⚠️ تنبيه تجاوز — تقرير Top-5</div><div class="td">تصعيد تلقائي للمُراجِع المسؤول</div></div>
+        <div class="tl-item"><div class="tt">إشعار الإصدار</div><div class="td">عند الاعتماد ينتقل العنصر إلى «مُصدَر» ويُخزَّن قراره ومنشؤه</div></div>
+      </div>
+    </div>
+  </div>
+`;
+
+SCREENS.report = ()=>stepper(7)+`
+  <div class="page-head"><h2>⑦ التقارير والتصدير</h2>
+  <p>تُنتج ثلاثة تقارير — Top-5، والاحتياجات بحسب الجنس، واحتياجات المجتمع الريفي — كلها قابلة للتصدير إلى PDF و Excel ومتسقة بين المنصة وملفات التصدير. (BR-11، BR-12، BR-13)</p></div>
+  <div class="grid g3">
+    <div class="card pad" style="border-top:3px solid var(--green)">
+      <h3 class="sec" style="margin:0 0 8px">🏆 تقرير Top-5</h3>
+      <p style="font-size:12.5px;color:var(--muted)">أهم خمس أولويات مع درجات الشدة ومكوّناتها.</p>
+      <div style="display:flex;gap:8px;margin-top:14px"><button class="btn sm" onclick="toast('تم تصدير PDF')">PDF ⬇</button><button class="btn sm ghost" onclick="toast('تم تصدير Excel')">Excel ⬇</button></div>
+    </div>
+    <div class="card pad" style="border-top:3px solid var(--blue)">
+      <h3 class="sec" style="margin:0 0 8px">⚥ الاحتياجات بحسب الجنس</h3>
+      <p style="font-size:12.5px;color:var(--muted)">تحليل مقارن حيث تتوفر بيانات الجنس.</p>
+      <div style="display:flex;gap:8px;margin-top:14px"><button class="btn sm" onclick="toast('تم تصدير PDF')">PDF ⬇</button><button class="btn sm ghost" onclick="toast('تم تصدير Excel')">Excel ⬇</button></div>
+    </div>
+    <div class="card pad" style="border-top:3px solid var(--gold)">
+      <h3 class="sec" style="margin:0 0 8px">🏘️ احتياجات المجتمع الريفي</h3>
+      <p style="font-size:12.5px;color:var(--muted)">نظرة على احتياجات القرى ضمن نطاق الدراسة.</p>
+      <div style="display:flex;gap:8px;margin-top:14px"><button class="btn sm" onclick="toast('تم تصدير PDF')">PDF ⬇</button><button class="btn sm ghost" onclick="toast('تم تصدير Excel')">Excel ⬇</button></div>
+    </div>
+  </div>
+  <div class="card pad" style="margin-top:18px">
+    <h3 class="sec">معاينة — تقرير Top-5 للاحتياجات</h3>
+    <div style="border:1px solid var(--line);border-radius:11px;padding:20px;background:#fff">
+      <div style="display:flex;justify-content:space-between;border-bottom:2px solid var(--green);padding-bottom:10px;margin-bottom:14px">
+        <div><b style="font-size:16px">تقرير احتياجات المياه — المنطقة الجنوبية</b><div style="font-size:12px;color:var(--muted)">جمعية تنمية القرى — الرياض · يوليو ٢٠٢٦</div></div>
+        <span class="badge b-green">✓ مُعتمَد ومنشور</span>
+      </div>
+      <table>
+        <tr><th>#</th><th>الحاجة</th><th>الدرجة</th><th>الأولوية</th><th>عدد الردود الداعمة</th></tr>
+        <tr><td>١</td><td>مياه شرب نظيفة</td><td><b>٩١</b></td><td><span class="badge b-red">حرجة</span></td><td>٣٤١</td></tr>
+        <tr><td>٢</td><td>معالجة وتنقية المياه</td><td><b>٨٤</b></td><td><span class="badge b-red">حرجة</span></td><td>٢٩٨</td></tr>
+        <tr><td>٣</td><td>قرب نقاط المياه</td><td><b>٧٦</b></td><td><span class="badge b-amber">عالية</span></td><td>٢٦٧</td></tr>
+        <tr><td>٤</td><td>شبكة الصرف الصحي</td><td><b>٦٨</b></td><td><span class="badge b-amber">عالية</span></td><td>٢١٢</td></tr>
+        <tr><td>٥</td><td>العبء الاقتصادي للمياه</td><td><b>٥٧</b></td><td><span class="badge b-gray">متوسطة</span></td><td>١٨٥</td></tr>
+      </table>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px"><button class="btn" onclick="toast('وُسِمت الدراسة كمنشورة وأُضيفت للمكتبة المرجعية');go('share')">وسم كمنشورة ‹</button><button class="btn ghost" onclick="go('library')">إرسال للمكتبة المرجعية</button></div>
+  </div>
+`;
+
+SCREENS.share = ()=>stepper(8)+`
+  <div class="page-head"><h2>⑧ المشاركة بين الجهات</h2>
+  <p>يمكن لجهة طلب الوصول إلى تقرير جهة أخرى؛ يُخطَر المالك فيوافق أو يرفض؛ عند الموافقة يُمنح وصول للقراءة فقط؛ كل طلب وقرار يُسجَّل. لا مدفوعات ولا تسعير ولا تداول بيانات. (BR-14)</p></div>
+  <div class="grid g2">
+    <div class="card pad">
+      <h3 class="sec">📥 طلبات واردة لتقاريرك</h3>
+      <div style="border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="display:flex;gap:10px;align-items:center"><div class="avatar" style="background:var(--blue)">ع</div><div><b>جمعية القرى — عسير</b><div style="font-size:12px;color:var(--muted)">تطلب: تقرير احتياجات المياه</div></div></div>
+          <span class="badge b-amber">بانتظار قرارك</span>
+        </div>
+        <div style="font-size:12.5px;color:var(--muted);margin-bottom:12px">السبب: «للاستفادة من المنهجية في دراسة مماثلة بمنطقتنا».</div>
+        <div style="display:flex;gap:8px"><button class="btn sm" onclick="toast('مُنح وصول للقراءة فقط — سُجِّل القرار')">✓ موافقة (قراءة فقط)</button><button class="btn sm gray" onclick="toast('رُفض الطلب وسُجِّل القرار')">✕ رفض</button></div>
+      </div>
+      <div class="note">🔒 كل طلب وقرار مشاركة مسجَّل ومرئي للمركز — دون إتاحة تحرير على بيانات جهتك.</div>
+    </div>
+    <div class="card pad">
+      <h3 class="sec">📤 طلباتك الصادرة</h3>
+      <table>
+        <tr><th>الجهة المالكة</th><th>التقرير</th><th>الحالة</th></tr>
+        <tr><td>جمعية الريف — القصيم</td><td>احتياجات التعليم</td><td><span class="badge b-green">✓ مُتاح (قراءة)</span></td></tr>
+        <tr><td>جمعية القرى — جازان</td><td>الرعاية الصحية</td><td><span class="badge b-amber">⏳ معلّق</span></td></tr>
+        <tr><td>جمعية التنمية — تبوك</td><td>الطرق الريفية</td><td><span class="badge b-red">✕ مرفوض</span></td></tr>
+      </table>
+      <h3 class="sec">مبدأ المشاركة</h3>
+      <div class="note gold">لا تقرير جهة يُتاح لجهة أخرى إلا بموافقة مالكه — في كل نسخة. الوصول الممنوح هو للقراءة فقط.</div>
+      <div style="text-align:center;margin-top:20px"><span style="font-size:34px">🎉</span><div style="font-weight:800;margin-top:6px">اكتملت رحلة التقييم من طرفها إلى طرفها</div><div style="font-size:13px;color:var(--muted)">تسجيل ‹ حاجة ‹ استبيان ‹ ردود ‹ تقييم ‹ اعتماد ‹ تقرير ‹ مشاركة</div></div>
+    </div>
+  </div>
+`;
+
+SCREENS.oversight = ()=>`
+  <div class="page-head"><h2>◎ إشراف المركز</h2>
+  <p>لمشرف المركز إشراف للقراءة فقط عبر الجهات — يتابع الدراسات والتقارير المنشورة ونشاط المشاركة، دون تحرير بيانات أي جهة. (BR-15)</p></div>
+  <div class="grid g4">
+    <div class="stat"><div class="lbl">🏢 الجهات المسجّلة</div><div class="num g">18</div></div>
+    <div class="stat"><div class="lbl">📋 الدراسات النشطة</div><div class="num b">47</div></div>
+    <div class="stat"><div class="lbl">✓ تقارير منشورة</div><div class="num a">126</div></div>
+    <div class="stat"><div class="lbl">🔄 عمليات مشاركة</div><div class="num p">63</div></div>
+  </div>
+  <div class="card pad" style="margin-top:16px">
+    <h3 class="sec">متابعة الجهات (قراءة فقط)</h3>
+    <table>
+      <tr><th>الجهة</th><th>المنطقة</th><th>دراسات نشطة</th><th>منشورة</th><th>آخر نشاط</th></tr>
+      <tr><td>جمعية تنمية القرى</td><td>الرياض</td><td>٦</td><td>١٢</td><td>اليوم</td></tr>
+      <tr><td>جمعية القرى</td><td>عسير</td><td>٤</td><td>٩</td><td>أمس</td></tr>
+      <tr><td>جمعية الريف</td><td>القصيم</td><td>٣</td><td>٧</td><td>قبل يومين</td></tr>
+      <tr><td>جمعية التنمية</td><td>تبوك</td><td>٥</td><td>١١</td><td>اليوم</td></tr>
+    </table>
+    <div class="note blue" style="margin-top:14px">👁️ إشراف للقراءة فقط. لا يستطيع المشرف الوصول إلى محتوى تقرير غير منشور دون موافقة الجهة.</div>
+  </div>
+`;
+
+SCREENS.audit = ()=>`
+  <div class="page-head"><h2>❐ سجل التدقيق</h2>
+  <p>كل إجراء مهم — إنشاء، تعديل، اعتماد، نشر، مشاركة، تغيير حالة — مؤرَّخ ومُسجَّل في سجل تدقيق وتاريخ تغييرات يُظهر مَن، وماذا، ومتى، والقيمة قبل/بعد. (BR-16)</p></div>
+  <div class="card">
+    <table>
+      <tr><th>الوقت</th><th>المستخدم</th><th>الإجراء</th><th>العنصر</th><th>قبل ‹ بعد</th></tr>
+      <tr><td>١٠:٤٢ ص</td><td>المُراجِع — سارة</td><td><span class="badge b-green">اعتماد</span></td><td>تصنيف حاجة المياه</td><td>مقترح ‹ مُعتمَد</td></tr>
+      <tr><td>١٠:١٥ ص</td><td>مسؤول البحوث — أحمد</td><td><span class="badge b-blue">إنشاء</span></td><td>دراسة المياه الجنوبية</td><td>— ‹ مسودة</td></tr>
+      <tr><td>٠٩:٥٨ ص</td><td>النظام</td><td><span class="badge b-purple">اقتراح AI</span></td><td>تصنيف الحاجة</td><td>ثقة ٩٢٪</td></tr>
+      <tr><td>٠٩:٣٠ ص</td><td>مسؤول البحوث — أحمد</td><td><span class="badge b-amber">تعديل</span></td><td>خطة توزيع العينة</td><td>٣٨٠ ‹ ٤١٠</td></tr>
+      <tr><td>أمس ٤:٢٠ م</td><td>المالك — جمعيتنا</td><td><span class="badge b-green">مشاركة</span></td><td>تقرير التعليم ‹ القصيم</td><td>خاص ‹ قراءة فقط</td></tr>
+      <tr><td>أمس ٣:٠٠ ص</td><td>النظام</td><td><span class="badge b-gray">نسخ احتياطي</span></td><td>بيانات الجهة</td><td>استعادة مُتحقَّقة ✓</td></tr>
+    </table>
+  </div>
+  <div class="note" style="margin-top:16px">🔐 سجل مقاوم للعبث. الأحداث العابرة للجهات مرئية للطرفين وللمركز.</div>
+`;
+
+SCREENS.library = ()=>`
+  <div class="page-head"><h2>▤ المكتبة المرجعية</h2>
+  <p>التقارير المُصدَرة والمنشورة محفوظة في أرشيف قابل للبحث مُصنَّف حسب الجهة والمنطقة والقطاع والتاريخ، وقابلة للإرسال إلى مكتبة المركز المرجعية لإعادة استخدام معتمدة. (BR-13)</p></div>
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <input placeholder="🔎 بحث في الأرشيف..." style="flex:1;min-width:200px;border:1.5px solid var(--line);border-radius:10px;padding:10px 13px;font-family:inherit">
+    <select style="border:1.5px solid var(--line);border-radius:10px;padding:10px;font-family:inherit"><option>كل القطاعات</option><option>المياه</option><option>التعليم</option><option>الصحة</option></select>
+    <select style="border:1.5px solid var(--line);border-radius:10px;padding:10px;font-family:inherit"><option>كل المناطق</option><option>الرياض</option><option>عسير</option></select>
+  </div>
+  <div class="card">
+    <table>
+      <tr><th>التقرير</th><th>الجهة</th><th>القطاع</th><th>المنطقة</th><th>التاريخ</th><th></th></tr>
+      <tr><td>احتياجات المياه — الجنوبية</td><td>جمعية القرى — الرياض</td><td><span class="badge b-blue">المياه</span></td><td>الرياض</td><td>يوليو ٢٠٢٦</td><td><button class="btn sm ghost" onclick="toast('فتح التقرير للقراءة')">عرض</button></td></tr>
+      <tr><td>خدمات التعليم الريفي</td><td>جمعية الريف — القصيم</td><td><span class="badge b-purple">التعليم</span></td><td>القصيم</td><td>يونيو ٢٠٢٦</td><td><button class="btn sm ghost" onclick="toast('فتح التقرير للقراءة')">عرض</button></td></tr>
+      <tr><td>الرعاية الصحية الأولية</td><td>جمعية القرى — عسير</td><td><span class="badge b-red">الصحة</span></td><td>عسير</td><td>مايو ٢٠٢٦</td><td><button class="btn sm ghost" onclick="toast('فتح التقرير للقراءة')">عرض</button></td></tr>
+    </table>
+  </div>
+`;
+
+SCREENS.map = ()=>`
+  <div class="page-head"><h2>⬡ الخريطة الجغرافية التفاعلية <span class="pill v2">النسخة الثانية</span></h2>
+  <p>تعرض الاحتياجات على خريطة ملوّنة حسب الأولوية، بتفصيل على مستوى المركز الإداري والمحافظة والمدينة، مع تصفية حسب القطاع والإلحاح والحالة. تعتمد على السجل الجغرافي الوطني من المركز. (BR-25، BR-32)</p></div>
+  <div class="map-wrap">
+    <div class="card pad">
+      <svg viewBox="0 0 400 320" style="width:100%;height:auto">
+        <rect width="400" height="320" fill="#f0f5f3" rx="10"/>
+        <polygon points="200,30 300,70 320,150 270,240 160,260 90,200 70,110 130,55" fill="#cfe3db" stroke="#9cc3b6" stroke-width="1.5"/>
+        <circle cx="180" cy="120" r="26" fill="#c0392b" opacity=".85"/><text x="180" y="125" text-anchor="middle" fill="#fff" font-size="12" font-weight="700" font-family="Tajawal">حرجة</text>
+        <circle cx="250" cy="170" r="20" fill="#b8791a" opacity=".85"/><text x="250" y="174" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="Tajawal">عالية</text>
+        <circle cx="140" cy="200" r="17" fill="#c79a3a" opacity=".85"/><text x="140" y="204" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="Tajawal">متوسطة</text>
+        <circle cx="220" cy="90" r="14" fill="#1f7a5c" opacity=".8"/><text x="220" y="94" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="Tajawal">منخفضة</text>
+        <circle cx="120" cy="130" r="12" fill="#c79a3a" opacity=".8"/>
+      </svg>
+      <div style="text-align:center;font-size:12.5px;color:var(--muted)">خريطة توضيحية — الاحتياجات حسب المركز الإداري / المحافظة / المدينة</div>
+    </div>
+    <div>
+      <div class="card pad" style="margin-bottom:14px">
+        <h3 class="sec" style="margin:0 0 10px">دليل الألوان</h3>
+        <div class="legend-row"><span class="sw" style="background:var(--red)"></span> حرجة (٨٠–١٠٠)</div>
+        <div class="legend-row"><span class="sw" style="background:var(--amber)"></span> عالية (٦٥–٧٩)</div>
+        <div class="legend-row"><span class="sw" style="background:var(--gold)"></span> متوسطة (٥٠–٦٤)</div>
+        <div class="legend-row"><span class="sw" style="background:var(--green)"></span> منخفضة (٠–٤٩)</div>
+      </div>
+      <div class="card pad">
+        <h3 class="sec" style="margin:0 0 10px">تصفية</h3>
+        <div class="field" style="margin-bottom:10px"><label>القطاع</label><select><option>الكل</option><option>المياه</option><option>الصحة</option></select></div>
+        <div class="field" style="margin-bottom:10px"><label>الإلحاح</label><select><option>الكل</option><option>حرجة</option></select></div>
+        <div class="field" style="margin-bottom:0"><label>المستوى</label><select><option>المحافظة</option><option>المركز الإداري</option><option>المدينة</option></select></div>
+      </div>
+    </div>
+  </div>
+  <div class="note blue" style="margin-top:16px">🗺️ نُجرَّب صورة مبكرة من الخريطة في النسخة الأولى، والتسليم المؤكد في النسخة الثانية، ويعتمد على السجل الجغرافي الوطني من المركز.</div>
+`;
+
+SCREENS.needsmgmt = ()=>`
+  <div class="page-head"><h2>⧉ إدارة الاحتياجات المهيكلة <span class="pill v2">النسخة الثانية</span></h2>
+  <p>تسجيل كل حاجة بمرجع فريد، وتتبّع حالتها التحليلية عبر دورة الدراسة، وربطها بالمبادرات والجهات، وإبراز الفجوات المفتوحة، وسجل قرارات متابعة. (BR-21)</p></div>
+  <div class="card">
+    <table>
+      <tr><th>المرجع</th><th>الحاجة</th><th>الحالة التحليلية</th><th>مرتبطة بمبادرة</th><th>الجهة</th></tr>
+      <tr><td><b>N-2026-0412</b></td><td>مياه شرب نظيفة</td><td><span class="badge b-green">مُعتمَدة</span></td><td>مبادرة مياه القرى</td><td>الرياض</td></tr>
+      <tr><td><b>N-2026-0418</b></td><td>معالجة المياه</td><td><span class="badge b-blue">قيد التحليل</span></td><td>—</td><td>الرياض</td></tr>
+      <tr><td><b>N-2026-0431</b></td><td>شبكة الصرف الصحي</td><td><span class="badge b-amber">فجوة مفتوحة</span></td><td>—</td><td>الرياض</td></tr>
+      <tr><td><b>N-2026-0455</b></td><td>الرعاية الصحية</td><td><span class="badge b-purple">قيد المتابعة</span></td><td>مبادرة الصحة الريفية</td><td>عسير</td></tr>
+    </table>
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="stat"><div class="lbl">⚠ فجوات مفتوحة</div><div class="num a">14</div><div class="sub">تحتاج ربطاً بمبادرة</div></div>
+    <div class="card pad"><h3 class="sec" style="margin:0 0 8px">سجل قرارات المتابعة</h3>
+      <div class="timeline"><div class="tl-item"><div class="tt">ربط N-2026-0412 بمبادرة مياه القرى</div><div class="td">قرار المشرف · اليوم</div></div>
+      <div class="tl-item"><div class="tt">تعليم N-2026-0431 كفجوة مفتوحة</div><div class="td">بانتظار قرار المركز · أمس</div></div></div>
+    </div>
+  </div>
+`;
+
+SCREENS.import = ()=>`
+  <div class="page-head"><h2>⇪ استيراد البيانات <span class="pill v2">النسخة الثانية</span></h2>
+  <p>استيراد بيانات مهيكلة — Excel/CSV بالجملة، الدراسة السابقة للمركز في عرض موحّد، ومجموعة بيانات الاحتياجات الوطنية — مع تحقق وتخطيط وتنظيف وتوحيد. (BR-22)</p></div>
+  <div class="card pad">
+    <div style="border:2px dashed var(--line);border-radius:14px;padding:34px;text-align:center;background:var(--bg)">
+      <div style="font-size:38px">⬆️</div>
+      <div style="font-weight:800;margin-top:8px">اسحب ملفات Excel / CSV هنا أو اخترها</div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:4px">مع التحقق والتخطيط للحقول والتنظيف والتوحيد</div>
+      <button class="btn" style="margin-top:14px" onclick="toast('جارٍ التحقق والتخطيط — ٣ ملفات')">اختيار الملفات</button>
+    </div>
+  </div>
+  <div class="card pad" style="margin-top:16px">
+    <h3 class="sec">حالة الاستيراد</h3>
+    <table>
+      <tr><th>المصدر</th><th>السجلات</th><th>التحقق</th><th>الحالة</th></tr>
+      <tr><td>الدراسة السابقة للمركز ٢٠٢٤</td><td>٣,٤٢٠</td><td>٩٨٪ صالحة</td><td><span class="badge b-green">✓ مُستورَدة</span></td></tr>
+      <tr><td>بيانات الاحتياجات الوطنية</td><td>١٢,٦٠٠</td><td>٩٤٪ صالحة</td><td><span class="badge b-blue">● قيد التنظيف</span></td></tr>
+      <tr><td>مسح ميداني — الأفلاج.xlsx</td><td>٤١٠</td><td>—</td><td><span class="badge b-amber">⏳ تخطيط الحقول</span></td></tr>
+    </table>
+  </div>
+`;
+
+SCREENS.dedupe = ()=>`
+  <div class="page-head"><h2>⧎ كشف التكرار الدلالي <span class="pill v2">النسخة الثانية</span></h2>
+  <p>يكتشف الاحتياجات المكررة بالمعنى (لا بالنص المطابق فقط) ويقترحها للمراجعة؛ قرار الدمج يبقى بيد مُراجِع بشري ويُسجَّل. (BR-23)</p></div>
+  <div class="card pad">
+    <div class="ai-box">
+      <div class="ai-head"><span class="spark">✦</span> تكرارات محتملة مكتشفة بالمعنى</div>
+      <div style="font-size:12.5px;color:var(--purple)">وجد الذكاء الاصطناعي ٣ أزواج متشابهة دلالياً بدرجة تشابه عالية.</div>
+    </div>
+    <div style="border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b>زوج محتمل — تشابه ٩٤٪</b><span class="badge b-amber">بانتظار قرار بشري</span></div>
+      <div class="grid g2">
+        <div style="background:var(--bg);border-radius:9px;padding:12px"><div style="font-size:12px;color:var(--muted)">N-0412 · الرياض</div><div style="font-weight:600">«نقص مياه الشرب النظيفة في القرى»</div></div>
+        <div style="background:var(--bg);border-radius:9px;padding:12px"><div style="font-size:12px;color:var(--muted)">N-0389 · الرياض</div><div style="font-weight:600">«صعوبة الحصول على مياه صالحة للشرب»</div></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px"><button class="btn sm" onclick="toast('تم الدمج وسُجِّل القرار')">دمج (مُراجَع)</button><button class="btn sm gray" onclick="toast('أُبقيت منفصلة — سُجِّل القرار')">إبقاء منفصلة</button></div>
+    </div>
+    <div class="note" style="margin-top:16px">👤 الذكاء الاصطناعي يقترح فقط — قرار الدمج بشري ومُسجَّل دائماً.</div>
+  </div>
+`;
+
+SCREENS.citizen = ()=>`
+  <div class="page-head"><h2>☺ قناة المواطن / المستفيد <span class="pill v2">النسخة الثانية</span></h2>
+  <p>قناة إدخال عامة (بما فيها عبر رمز QR) تتيح للأفراد تقديم حاجة كمصدر بيانات، بتحقق عبر كلمة مرور لمرة واحدة (OTP)؛ تُحفظ للمراجعة البشرية ولا تُضاف تلقائياً أبداً. (BR-24)</p></div>
+  <div class="grid g2">
+    <div class="card pad">
+      <h3 class="sec">نموذج المواطن العام</h3>
+      <div class="field"><label>رقم الجوال (للتحقق OTP)</label><input value="05X XXX XXXX"></div>
+      <div class="field"><label>المنطقة / القرية</label><input value="قرية الحصون — الأفلاج"></div>
+      <div class="field"><label>وصف الحاجة</label><textarea>لا يوجد مصدر مياه قريب، ونعتمد على صهاريج مكلفة.</textarea></div>
+      <button class="btn gold" onclick="toast('أُرسل رمز التحقق OTP إلى الجوال')">إرسال رمز التحقق</button>
+      <div class="note gold" style="margin-top:14px">📲 يمكن الوصول للنموذج عبر رمز QR في الأماكن العامة.</div>
+    </div>
+    <div class="card pad">
+      <h3 class="sec">طابور المراجعة البشرية</h3>
+      <table>
+        <tr><th>الحاجة المُقدَّمة</th><th>القرية</th><th>الحالة</th></tr>
+        <tr><td>نقص مياه قريبة</td><td>الحصون</td><td><span class="badge b-amber">⏳ للمراجعة</span></td></tr>
+        <tr><td>انقطاع الكهرباء المتكرر</td><td>الفرعة</td><td><span class="badge b-amber">⏳ للمراجعة</span></td></tr>
+        <tr><td>بُعد المدرسة</td><td>الروضة</td><td><span class="badge b-green">✓ قُبلت للبيانات</span></td></tr>
+      </table>
+      <div class="note" style="margin-top:14px">🔒 كل مُدخَل مواطن يُحتجَز للمراجعة البشرية ولا يدخل البيانات المعتمدة تلقائياً.</div>
+      <div style="display:flex;gap:8px;margin-top:12px"><button class="btn sm" onclick="toast('قُبلت كمصدر بيانات بعد المراجعة')">قبول</button><button class="btn sm gray" onclick="toast('رُفض الإدخال')">رفض</button></div>
+    </div>
+  </div>
+`;
+
+SCREENS.methodology = ()=>`
+  <div class="page-head"><h2>⚙ إدارة المنهجية والأوزان <span class="pill v2">النسخة الثانية</span></h2>
+  <p>يدير المركز الإطار وبنك الأسئلة والأوزان والتصنيفات عبر واجهة، دون تغييرات برمجية، تحت إصدارات منهجية تُبقي الدراسات والتقارير التاريخية قابلة لإعادة الإنتاج. (BR-27، BR-28)</p></div>
+  <div class="grid g2">
+    <div class="card pad">
+      <h3 class="sec">أوزان معايير التقييم (قابلة للضبط)</h3>
+      <div class="field"><label>شدة الأثر — <b>٣٥٪</b></label><input type="range" min="0" max="100" value="35" style="width:100%"></div>
+      <div class="field"><label>عدد المتأثرين — <b>٢٥٪</b></label><input type="range" min="0" max="100" value="25" style="width:100%"></div>
+      <div class="field"><label>الإلحاح الزمني — <b>٢٠٪</b></label><input type="range" min="0" max="100" value="20" style="width:100%"></div>
+      <div class="field"><label>حجم الفجوة — <b>٢٠٪</b></label><input type="range" min="0" max="100" value="20" style="width:100%"></div>
+      <button class="btn" onclick="toast('حُفظت الأوزان كإصدار منهجية جديد v3.1')">حفظ كإصدار منهجية</button>
+    </div>
+    <div class="card pad">
+      <h3 class="sec">إصدارات المنهجية</h3>
+      <table>
+        <tr><th>الإصدار</th><th>التاريخ</th><th>الحالة</th></tr>
+        <tr><td>v3.0</td><td>يوليو ٢٠٢٦</td><td><span class="badge b-green">● نشط</span></td></tr>
+        <tr><td>v2.4</td><td>مارس ٢٠٢٦</td><td><span class="badge b-gray">مؤرشف</span></td></tr>
+        <tr><td>v2.0</td><td>يناير ٢٠٢٦</td><td><span class="badge b-gray">مؤرشف</span></td></tr>
+      </table>
+      <div class="note blue" style="margin-top:14px">🔁 الدراسات التاريخية تبقى قابلة لإعادة الإنتاج بإصدار منهجيتها الأصلي.</div>
+      <h3 class="sec">تصنيف نوع الفجوة</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="badge b-red">غياب كامل</span><span class="badge b-amber">قصور جزئي</span><span class="badge" style="background:var(--gold-l);color:var(--gold)">جودة متدنية</span><span class="badge b-blue">وصول محدود</span></div>
+    </div>
+  </div>
+`;
+
+SCREENS.trends = ()=>`
+  <div class="page-head"><h2>⟁ دورات القياس والاتجاهات <span class="pill v2">النسخة الثانية</span></h2>
+  <p>تُدار دورات القياس بحيث تكون التقييمات المتكررة للمجتمع نفسه قابلة للمقارنة عبر الزمن، مع عرض اتجاه أول ومقارنة بين الدراسات وبيانات جاهزة للتحليل. (BR-29)</p></div>
+  <div class="card pad">
+    <h3 class="sec">اتجاه درجة الحاجة — «مياه الشرب / المنطقة الجنوبية»</h3>
+    <svg viewBox="0 0 600 240" style="width:100%;height:auto">
+      <line x1="50" y1="200" x2="580" y2="200" stroke="#e2e9e6" stroke-width="1.5"/>
+      <line x1="50" y1="20" x2="50" y2="200" stroke="#e2e9e6" stroke-width="1.5"/>
+      <polyline points="90,60 220,80 350,120 480,150" fill="none" stroke="#1f7a5c" stroke-width="3"/>
+      <circle cx="90" cy="60" r="6" fill="#c0392b"/><circle cx="220" cy="80" r="6" fill="#c0392b"/><circle cx="350" cy="120" r="6" fill="#b8791a"/><circle cx="480" cy="150" r="6" fill="#c79a3a"/>
+      <text x="90" y="225" text-anchor="middle" font-size="13" font-family="Tajawal" fill="#5f7169">Q1 ٢٠٢٥</text>
+      <text x="220" y="225" text-anchor="middle" font-size="13" font-family="Tajawal" fill="#5f7169">Q3 ٢٠٢٥</text>
+      <text x="350" y="225" text-anchor="middle" font-size="13" font-family="Tajawal" fill="#5f7169">Q1 ٢٠٢٦</text>
+      <text x="480" y="225" text-anchor="middle" font-size="13" font-family="Tajawal" fill="#5f7169">Q3 ٢٠٢٦</text>
+      <text x="105" y="52" font-size="13" font-weight="700" font-family="Tajawal" fill="#c0392b">٩١</text>
+      <text x="495" y="145" font-size="13" font-weight="700" font-family="Tajawal" fill="#c79a3a">٦٤</text>
+    </svg>
+    <div class="note" style="margin-top:8px">📉 انخفضت درجة الحاجة من ٩١ إلى ٦٤ عبر أربع دورات قياس — مؤشر على أثر التدخلات.</div>
+  </div>
+  <div class="grid g3" style="margin-top:16px">
+    <div class="stat"><div class="lbl">دورات القياس</div><div class="num g">4</div></div>
+    <div class="stat"><div class="lbl">التحسّن التراكمي</div><div class="num b">−٢٧</div><div class="sub">نقطة على المقياس</div></div>
+    <div class="stat"><div class="lbl">مجتمعات مُتابَعة</div><div class="num p">25</div></div>
+  </div>
+`;
+
+SCREENS.roles = ()=>{
+  const rows=[
+    ['مشرف المركز','var(--green)','م','إشراف عابر للجهات · قراءة فقط','1'],
+    ['مسؤول بحوث الجمعية','var(--blue)','ب','ينشئ الدراسات والاستبيانات من البنك','1'],
+    ['المُراجِع / المُعتمِد','var(--purple)','ر','بوابة القرار البشري على كل مخرجات AI','1'],
+    ['مدير الجمعية','var(--amber)','د','يدير حساب الجهة والفرق والدراسات','2'],
+    ['الباحث الميداني','var(--red)','ح','يُدخل الاحتياجات ويوثّق المصدر والملاحظات','2'],
+    ['محلل البيانات','#0d7d8c','ل','يعالج البيانات ويجهّز التقارير واللوحات','2'],
+    ['مدير النظام','#5b6470','ن','يدير الحسابات والصلاحيات وسجل التدقيق','2'],
+    ['مُشاهِد للقراءة فقط','#8a8f98','ش','يطّلع على المخرجات المصرَّح بها دون تحرير','2'],
+    ['مواطن / مستفيد (ضيف)','#c79a3a','و','يقدّم حاجة عبر OTP · يُراجَع بشرياً دائماً','2'],
+  ];
+  let cards='';
+  rows.forEach(r=>{
+    cards+='<div class="role-card"><div class="rh"><div style="display:flex;gap:10px;align-items:center"><div class="avatar" style="background:'+r[1]+'">'+r[2]+'</div><div class="rn">'+r[0]+'</div></div><span class="pill '+(r[4]==='1'?'v1':'v2')+'">'+(r[4]==='1'?'V1':'V2')+'</span></div><div class="rd">'+r[3]+'</div></div>';
+  });
+  return '<div class="page-head"><h2>⚑ نموذج الأدوار التسعة <span class="pill v2">النسخة الثانية</span></h2><p>يُفعَّل نموذج الأدوار الكامل — بإضافة مدير الجمعية، والباحث الميداني، ومحلل البيانات، ومدير النظام، والمُشاهِد للقراءة فقط، والمواطن/المستفيد الضيف — لكل منها صلاحيات محددة. (BR-20)</p></div><div class="grid g3">'+cards+'</div>';
+};
+
+buildNav();
+go('dashboard');
+</script>
+</body>
+</html>
